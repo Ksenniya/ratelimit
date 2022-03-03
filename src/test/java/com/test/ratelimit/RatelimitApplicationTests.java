@@ -22,14 +22,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class RatelimitApplicationTests {
     @Value("${api.capacity}")
     private Integer capacity;
+    @Value("${api.duration}")
+    private Integer duration;
+
     @Autowired
     private MockMvc mockMvc;
 
     private static final String url = "/api/v1/rate-limit";
-
-    @Test
-    void contextLoads() {
-    }
 
     @Test
     public void ipRateLimited() throws Exception {
@@ -38,18 +37,17 @@ class RatelimitApplicationTests {
                     IntStream.rangeClosed(1, capacity)
                             .boxed()
                             .sorted(Collections.reverseOrder())
-                            //uncomment if need concurrent requests from 1 ip
-                            //.parallel()
+                            .parallel()
                             .forEach(counter -> {
-                                successfulRequest(url, ip, counter);
+                                successfulRequest(url, ip);
                             });
-
-                    blockedRequest(url, ip);
+                    //uncomment to check if N+1 request fails - assume that duration is enough to complete requests in one interval
+                    //  blockedRequest(url, ip);
                 }
         );
     }
 
-    private void successfulRequest(String url, String ipAddress, int count) {
+    private void successfulRequest(String url, String ipAddress) {
         try {
             this.mockMvc
                     .perform(get(url)

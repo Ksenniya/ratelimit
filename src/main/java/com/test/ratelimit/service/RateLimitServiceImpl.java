@@ -2,6 +2,7 @@ package com.test.ratelimit.service;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
+import io.github.bucket4j.Refill;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -20,12 +21,12 @@ public class RateLimitServiceImpl implements RateLimitService {
     Map<String, Bucket> bucketCache = new ConcurrentHashMap<>();
 
     @Override
-    public Bucket resolveBucket(String apiKey) {
-        return bucketCache.computeIfAbsent(apiKey, this::newBucket);
+    public Bucket resolveBucket(String ipAddress) {
+        return bucketCache.computeIfAbsent(ipAddress, this::newBucket);
     }
 
     private Bucket newBucket(String s) {
         return Bucket.builder()
-                .addLimit(Bandwidth.simple(capacity, Duration.ofMinutes(duration))).build();
+                .addLimit(Bandwidth.classic(capacity, Refill.greedy(capacity/(capacity/10+1), Duration.ofMinutes(1)))).build();
     }
 }

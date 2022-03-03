@@ -1,5 +1,5 @@
 api:
   #parameter N
-  capacity: 10
+  capacity: 5
   #parameter X
   duration: 1
