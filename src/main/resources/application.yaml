@@ -1,0 +1,5 @@
+api:
+  #parameter N
+  capacity: 10
+  #parameter X
+  duration: 1
