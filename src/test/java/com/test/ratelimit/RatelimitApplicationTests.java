@@ -22,8 +22,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class RatelimitApplicationTests {
     @Value("${api.capacity}")
     private Integer capacity;
-    @Value("${api.duration}")
-    private Integer duration;
 
     @Autowired
     private MockMvc mockMvc;
