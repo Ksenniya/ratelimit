@@ -1,12 +1,9 @@
 package com.test.ratelimit.service;
 
-import io.github.bucket4j.Bandwidth;
-import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Refill;
+import com.test.ratelimit.bucket.SimpleBucket;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -18,15 +15,24 @@ public class RateLimitServiceImpl implements RateLimitService {
     @Value("${api.duration}")
     private Integer duration;
 
-    Map<String, Bucket> bucketCache = new ConcurrentHashMap<>();
+    Map<String, SimpleBucket> bucketCache = new ConcurrentHashMap<>();
 
     @Override
-    public Bucket resolveBucket(String ipAddress) {
+    public SimpleBucket resolveBucket(String ipAddress) {
         return bucketCache.computeIfAbsent(ipAddress, this::newBucket);
     }
 
+    /*
+
+    With bucket4j Bucket would be:
+
     private Bucket newBucket(String s) {
         return Bucket.builder()
-                .addLimit(Bandwidth.classic(capacity, Refill.greedy(capacity/(capacity/10+1), Duration.ofMinutes(1)))).build();
+                .addLimit(Bandwidth.classic(capacity, Duration.ofMinutes(duration)))).build();
+    }
+    */
+
+    private SimpleBucket newBucket(String s) {
+        return new SimpleBucket(capacity, duration);
     }
 }

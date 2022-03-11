@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -22,7 +23,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class RatelimitApplicationTests {
     @Value("${api.capacity}")
     private Integer capacity;
-
+    @Value("${api.capacity}")
+    private Integer duration;
     @Autowired
     private MockMvc mockMvc;
 
@@ -43,6 +45,28 @@ class RatelimitApplicationTests {
                     //  blockedRequest(url, ip);
                 }
         );
+    }
+
+    @Test
+    public void ipRateLimitedWithTime() throws Exception {
+        long started = System.currentTimeMillis();
+
+        List<String> ipList = new ArrayList<>(Arrays.asList("192.168.0.2", "192.168.0.1", "192.168.0.0"));
+        ipList.parallelStream().forEach(ip -> {
+                    IntStream.rangeClosed(1, capacity)
+                            .boxed()
+                            .sorted(Collections.reverseOrder())
+                            .parallel()
+                            .forEach(counter -> {
+                                successfulRequest(url, ip);
+                            });
+                    //uncomment to check if N+1 request fails - assume that duration is enough to complete requests in one interval
+                    //  blockedRequest(url, ip);
+                }
+        );
+        long ended = System.currentTimeMillis();
+        assertTrue((ended - started) <= (duration * 60000));
+
     }
 
     private void successfulRequest(String url, String ipAddress) {

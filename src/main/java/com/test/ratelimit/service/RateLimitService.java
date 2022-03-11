@@ -1,7 +1,9 @@
 package com.test.ratelimit.service;
 
-import io.github.bucket4j.Bucket;
+
+import com.test.ratelimit.bucket.SimpleBucket;
 
 public interface RateLimitService {
-    Bucket resolveBucket(String ipAddress);
+
+    SimpleBucket resolveBucket(String ipAddress);
 }

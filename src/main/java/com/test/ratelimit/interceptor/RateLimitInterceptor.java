@@ -1,8 +1,8 @@
 package com.test.ratelimit.interceptor;
 
+import com.test.ratelimit.bucket.ConsumptionProbe;
+import com.test.ratelimit.bucket.SimpleBucket;
 import com.test.ratelimit.service.RateLimitService;
-import io.github.bucket4j.Bucket;
-import io.github.bucket4j.ConsumptionProbe;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -30,8 +30,8 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         if (ipAddress == null) {
             ipAddress = request.getRemoteAddr();
         }
-        Bucket tokenBucket = rateLimiterService.resolveBucket(ipAddress);
-        ConsumptionProbe probe = tokenBucket.tryConsumeAndReturnRemaining(1);
+        SimpleBucket tokenBucket = rateLimiterService.resolveBucket(ipAddress);
+        ConsumptionProbe probe = tokenBucket.tryConsume();
         if (probe.isConsumed()) {
             return true;
         } else {
@@ -40,4 +40,6 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         }
     }
 }
+
+
 
